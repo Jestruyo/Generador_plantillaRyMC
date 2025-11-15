@@ -1,0 +1,1401 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Programa JW - Generador Automático</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; background: #f8fafc; color: #111; padding: 12px; line-height: 1.5; }
+    #uploadSection { max-width: 950px; margin: 20px auto; padding: 25px; background: white; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    #uploadSection h2 { margin-bottom: 20px; color: #0a3ab1; font-size: 1.5rem; }
+    #epubFile { display: block; margin-bottom: 15px; padding: 15px; border: 2px dashed #1e58e7; border-radius: 8px; width: 100%; cursor: pointer; background: #f0f7ff; transition: all 0.2s; }
+    #epubFile:hover { border-color: #0a3ab1; background: #e3f2fd; }
+    #semanasLista { margin-top: 25px; }
+    .semana-card { padding: 15px; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; transition: all 0.2s; background: #f9fafb; margin-bottom: 12px; }
+    .semana-card:hover { border-color: #1e58e7; background: #f0f7ff; transform: translateX(5px); }
+    .semana-titulo { font-weight: bold; color: #0a3ab1; margin-bottom: 5px; font-size: 1.1rem; }
+    .semana-lectura { font-size: 0.9rem; color: #666; margin-bottom: 3px; }
+    .semana-canciones { font-size: 0.85rem; color: #888; }
+    .container { max-width: 950px; margin: 0 auto; background: #fff; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); overflow: hidden; display: none; }
+    .header { background: linear-gradient(135deg, #0a3ab1 0%, #1e58e7 50%, #3b82f6 100%); color: white; text-align: center; padding: 20px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+    .header h1 { font-size: 1.5rem; margin-bottom: 12px; font-weight: 600; letter-spacing: 0.3px; }
+    .header-divider { height: 2px; background: rgba(255,255,255,0.3); margin: 12px auto; max-width: 600px; }
+    .header-info-grid { display: grid; grid-template-columns: auto auto auto; gap: 20px; justify-content: center; align-items: center; font-size: 0.95rem; margin-top: 10px; }
+    .header-info-grid > div { display: flex; align-items: center; gap: 6px; }
+    .header .name-field { border: none; color: white; background: rgba(255,255,255,0.2); min-width: 180px; max-width: 300px; display: inline-block; text-align: center; padding: 6px 12px; transition: all 0.2s; font-weight: 600; border-radius: 6px; border: 1px solid rgba(255,255,255,0.3); }
+    .header .name-field:focus { background: rgba(255,255,255,0.3); outline: none; box-shadow: 0 0 0 3px rgba(255,255,255,0.2); }
+    .header .name-field:empty { background: rgba(255,255,255,0.15); box-shadow: 0 0 8px rgba(255, 255, 255, 0.4); }
+    .header .name-field:empty:before { content: attr(placeholder); color: rgba(255,255,255,0.7); font-style: italic; }
+    .info-section { background: #f9fafb; padding: 20px; border-bottom: 1px solid #e5e7eb; display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    .info-box { background: white; padding: 14px 18px; border-radius: 8px; border-left: 4px solid #0a3ab1; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: all 0.2s; }
+    .info-box:hover { box-shadow: 0 2px 6px rgba(0,0,0,0.1); transform: translateY(-1px); }
+    .info-label { font-weight: 600; color: #374151; margin-bottom: 6px; font-size: 0.9rem; }
+    .name-field { border: none; background: #f3f4f6; padding: 8px 12px; min-width: 200px; display: block; width: 100%; outline: none; transition: all 0.3s ease; font-family: inherit; font-size: inherit; border-radius: 6px; border: 2px solid transparent; }
+    .info-box .name-field { margin-top: 4px; }
+    .name-field:empty { background: #fef3c7; border-left: 3px solid #f59e0b; box-shadow: inset 0 0 0 1px #fbbf24; }
+    .name-field:focus { background: #e3f2fd; border: 2px solid #1e58e7; box-shadow: 0 0 0 3px rgba(30, 88, 231, 0.1); }
+    .name-field:hover:not(:focus) { background: #e5e7eb; }
+    .prayer-field { font-weight: 600; }
+    .section-wrapper { max-width: 950px; margin: 0 auto; padding: 0 20px; }
+    .section-header { color: white; padding: 12px 20px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 2px 4px rgba(0,0,0,0.15); font-size: 0.9rem; border-radius: 8px; margin: 20px 0 15px 0; display: inline-block; min-width: 250px; max-width: 100%; width: auto; }
+    .section-header.tesoros { background: linear-gradient(135deg, #6b7280, #9ca3af); }
+    .section-header.gold { background: linear-gradient(135deg, #d97706, #f59e0b); }
+    .section-header.red { background: linear-gradient(135deg, #7f1d1d, #991b1b); }
+    .program-part { display: flex; padding: 18px 20px; border-bottom: 1px solid #f3f4f6; align-items: flex-start; gap: 15px; transition: background 0.2s; position: relative; }
+    .program-part:hover { background: #fafbfc; }
+    .program-part.tesoros::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: #9ca3af; }
+    .program-part.maestros::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: #f59e0b; }
+    .program-part.vida::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: #991b1b; }
+    .time-part { background: linear-gradient(135deg, #f0f4ff, #e3f2fd); padding: 8px 14px; border-radius: 8px; font-weight: 700; color: #0a3ab1; display: inline-block; min-width: 95px; text-align: center; flex-shrink: 0; font-size: 1rem; border: 2px solid #dbeafe; box-shadow: 0 2px 4px rgba(10, 58, 177, 0.1); }
+    .part-details { flex: 1; }
+    .song-prayer { display: flex; align-items: center; justify-content: flex-start; gap: 20px; flex-wrap: wrap; }
+    .song-prayer > div:first-child { flex: 0 0 auto; font-weight: 600; }
+    .song-prayer > div:last-child { display: flex; align-items: center; gap: 8px; justify-content: flex-start; flex: 0 1 auto; min-width: 250px; }
+    .song-prayer .prayer-field { max-width: 300px; min-width: 200px; flex: 0 1 300px; }
+    .part-title { margin-bottom: 10px; font-weight: 600; color: #1f2937; font-size: 1rem; }
+    .location-box { border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-top: 10px; overflow: hidden; background: #fafafa; max-width: 100%; border: 1px solid #e5e7eb; }
+    .location-box.centered { max-width: 600px; margin-left: 0; margin-right: auto; }
+    .location-header { background: linear-gradient(135deg, #e5e7eb, #f3f4f6); padding: 10px 14px; font-weight: 700; text-align: center; font-size: 0.9rem; color: #374151; border-bottom: 2px solid #d1d5db; }
+    .location-content { padding: 14px 18px; background: white; }
+    .role-field { display: flex; align-items: center; justify-content: flex-start; margin-bottom: 12px; min-height: 36px; gap: 12px; }
+    .role-field:last-child { margin-bottom: 0; }
+    .role-label { font-weight: 600; min-width: 100px; flex-shrink: 0; color: #4b5563; text-align: left; font-size: 0.9rem; }
+    .role-field .name-field { flex: 1; max-width: 400px; min-width: 250px; }
+    .two-columns { display: flex; gap: 24px; justify-content: flex-start; flex-wrap: wrap; position: relative; }
+    .two-columns::after { content: ''; position: absolute; left: 50%; top: 10%; bottom: 10%; width: 2px; background: linear-gradient(to bottom, transparent, #d1d5db, transparent); transform: translateX(-50%); pointer-events: none; }
+    .column { flex: 1; min-width: 280px; max-width: 450px; }
+    .action-buttons { display: flex; justify-content: center; gap: 12px; padding: 24px; flex-wrap: wrap; background: #f9fafb; border-top: 2px solid #e5e7eb; }
+    .btn { padding: 12px 24px; font-weight: 700; border-radius: 8px; cursor: pointer; border: none; display: flex; align-items: center; gap: 8px; transition: all 0.2s; font-size: 0.95rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-print { background: linear-gradient(135deg, #dc2626, #ef4444); color: white; }
+    .btn-print:hover:not(:disabled) { background: linear-gradient(135deg, #b91c1c, #dc2626); transform: translateY(-2px); box-shadow: 0 4px 8px rgba(220, 38, 38, 0.3); }
+    .btn-image { background: linear-gradient(135deg, #16a34a, #22c55e); color: white; }
+    .btn-image:hover:not(:disabled) { background: linear-gradient(135deg, #15803d, #16a34a); transform: translateY(-2px); box-shadow: 0 4px 8px rgba(22, 163, 74, 0.3); }
+    .btn-html { background: linear-gradient(135deg, #7c3aed, #8b5cf6); color: white; }
+    .btn-html:hover:not(:disabled) { background: linear-gradient(135deg, #6d28d9, #7c3aed); transform: translateY(-2px); box-shadow: 0 4px 8px rgba(124, 58, 237, 0.3); }
+    .btn-clean { background: linear-gradient(135deg, #ea580c, #f97316); color: white; }
+    .btn-clean:hover:not(:disabled) { background: linear-gradient(135deg, #c2410c, #ea580c); transform: translateY(-2px); box-shadow: 0 4px 8px rgba(234, 88, 12, 0.3); }
+    .btn-back { background: linear-gradient(135deg, #6b7280, #9ca3af); color: white; }
+    .btn-back:hover:not(:disabled) { background: linear-gradient(135deg, #4b5563, #6b7280); transform: translateY(-2px); box-shadow: 0 4px 8px rgba(107, 114, 128, 0.3); }
+    #toast { position: fixed; right: 20px; bottom: 20px; background: linear-gradient(135deg, #1f2937, #374151); color: #fff; padding: 14px 20px; border-radius: 8px; opacity: 0; transition: opacity 0.3s; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.3); font-size: 0.95rem; font-weight: 600; }
+    @media (max-width: 768px) { .two-columns { flex-direction: column; gap: 12px; } .two-columns::after { display: none; } .column { max-width: 100%; } .header-info-grid { grid-template-columns: 1fr; gap: 10px; } .info-section { grid-template-columns: 1fr; } }
+    @media (max-width: 600px) { body { padding: 6px; } #uploadSection { padding: 15px; } .container { border-radius: 6px; } .section-wrapper { padding: 0 10px; } .section-header { width: 100%; margin: 15px 0 10px 0; border-radius: 6px; min-width: 0; } .header { padding: 12px 10px; } .header h1 { font-size: 1rem; margin-bottom: 6px; line-height: 1.3; } .header-divider { margin: 8px auto; } .header-info-grid { grid-template-columns: 1fr; gap: 8px; font-size: 0.85rem; } .header .name-field { min-width: 120px; max-width: 100%; font-size: 0.85rem; padding: 4px 8px; } .info-section { padding: 10px; grid-template-columns: 1fr; gap: 10px; } .info-box { padding: 10px 12px; } .info-label { font-size: 0.85rem; } .name-field { font-size: 0.9rem; padding: 6px 10px; } .section-header { padding: 8px 10px; font-size: 0.85rem; letter-spacing: 0.5px; } .program-part { flex-direction: column; padding: 12px 10px; gap: 8px; } .program-part::before { width: 3px; } .time-part { font-size: 0.95rem; padding: 6px 12px; min-width: 85px; } .part-title { font-size: 0.9rem; margin-bottom: 8px; } .song-prayer { flex-direction: column; gap: 8px; align-items: flex-start; } .song-prayer > div { width: 100%; font-size: 0.9rem; } .song-prayer > div:last-child { justify-content: flex-start; } .song-prayer .prayer-field { max-width: 100%; width: 100%; } .location-box { margin-top: 8px; } .location-header { padding: 8px 10px; font-size: 0.85rem; } .location-content { padding: 10px 12px; } .role-field { flex-direction: column; align-items: flex-start; gap: 4px; margin-bottom: 10px; } .role-label { font-size: 0.85rem; } .role-field .name-field { width: 100%; max-width: 100%; } .action-buttons { flex-direction: column; padding: 12px; gap: 8px; } .btn { width: 100%; justify-content: center; padding: 10px 15px; } }
+    @media print { .action-buttons { display: none; } body { padding: 0; background: white; } .container { box-shadow: none; border-radius: 0; } .header, .section-header { position: relative; } .name-field { background: #f5f5f5; border: 1px solid #ddd; } .name-field:empty { background: white; border: 1px solid #ccc; } .program-part::before { display: none; } }
+  </style>
+</head>
+<body>
+  <div id="uploadSection">
+    <h2>📚 Generador Automático de Programas</h2>
+    <p style="color: #666; margin-bottom: 20px;">Sube el archivo EPUB del programa de reuniones para extraer automáticamente todas las semanas.</p>
+    <input type="file" id="epubFile" accept=".epub">
+    <button id="btnProcesar" class="btn btn-print">🔍 Procesar EPUB</button>
+    <div id="semanasLista"></div>
+  </div>
+  <div class="container" id="programaContainer">
+    <div class="header">
+      <h1>Programa para la reunión de entre semana</h1>
+      <div class="header-divider"></div>
+      <div class="header-info-grid">
+        <div><span>📍</span><strong>Congregación:</strong> <span contenteditable="true" class="name-field" aria-label="Congregación" placeholder="Nombre"></span></div>
+        <div id="headerInfoDate"><span>📅</span><span>Cargando...</span></div>
+        <div id="headerInfoReading"><span>📖</span><span>Cargando...</span></div>
+      </div>
+    </div>
+    <div class="info-section">
+      <div class="info-box"><div class="info-label">Presidente:</div><span contenteditable="true" class="name-field" aria-label="Presidente"></span></div>
+      <div class="info-box"><div class="info-label">Consejero de la sala auxiliar:</div><span contenteditable="true" class="name-field" aria-label="Consejero"></span></div>
+    </div>
+    <div id="programaParts"></div>
+    <div class="action-buttons">
+      <button class="btn btn-print" id="btnPdf">📄 PDF</button>
+      <button class="btn btn-image" id="btnImage">🖼️ Imagen</button>
+      <button class="btn btn-html" id="btnHtml">💾 HTML</button>
+      <button class="btn btn-clean" id="btnClean">🧹 Limpiar</button>
+      <button class="btn btn-back" id="btnBack">↩️ Volver</button>
+    </div>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+(function() {
+  'use strict';
+  
+  // ============================================
+  // ESTADO GLOBAL DE LA APLICACIÓN
+  // ============================================
+  const Estado = {
+    programas: [],
+    programaActual: null,
+    debug: true
+  };
+
+  // ============================================
+  // CONFIGURACIÓN
+  // ============================================
+  const CONFIG = {
+    DURACION_CANCION: 5,
+    LIBROS: [
+      'GÉNESIS', 'ÉXODO', 'LEVÍTICO', 'NÚMEROS', 'DEUTERONOMIO',
+      'JOSUÉ', 'JUECES', 'RUT', '1 SAMUEL', '2 SAMUEL',
+      '1 REYES', '2 REYES', '1 CRÓNICAS', '2 CRÓNICAS',
+      'ESDRAS', 'NEHEMÍAS', 'ESTER', 'JOB', 'SALMOS',
+      'PROVERBIOS', 'ECLESIASTÉS', 'CANTARES',
+      'CANTAR DE LOS CANTARES', 'EL CANTAR DE LOS CANTARES',
+      'ISAÍAS', 'JEREMÍAS', 'LAMENTACIONES', 'EZEQUIEL', 'DANIEL',
+      'OSEAS', 'JOEL', 'AMÓS', 'ABDÍAS', 'JONÁS',
+      'MIQUEAS', 'NAHÚM', 'HABACUC', 'SOFONÍAS', 'HAGEO',
+      'ZACARÍAS', 'MALAQUÍAS', 'MATEO', 'MARCOS', 'LUCAS',
+      'JUAN', 'HECHOS', 'ROMANOS', '1 CORINTIOS', '2 CORINTIOS',
+      'GÁLATAS', 'EFESIOS', 'FILIPENSES', 'COLOSENSES',
+      '1 TESALONICENSES', '2 TESALONICENSES', '1 TIMOTEO', '2 TIMOTEO',
+      'TITO', 'FILEMÓN', 'HEBREOS', 'SANTIAGO',
+      '1 PEDRO', '2 PEDRO', '1 JUAN', '2 JUAN', '3 JUAN',
+      'JUDAS', 'APOCALIPSIS'
+    ],
+    INICIO_REUNION_MINUTOS: 1140 // 19:00 = 7:00 PM
+  };
+
+  // ============================================
+  // UTILIDADES GENERALES
+  // ============================================
+  const Utils = {
+    // Convierte minutos a formato de hora (ej: 1140 -> "07:00 PM")
+    formatoHora(minutos) {
+      const totalMinutos = Math.max(0, Math.floor(minutos));
+      let horas = Math.floor(totalMinutos / 60);
+      const mins = totalMinutos % 60;
+      const ampm = horas >= 12 ? 'PM' : 'AM';
+      
+      horas = horas % 12;
+      if (horas === 0) {
+        horas = 12;
+      }
+      
+      return `${horas.toString().padStart(2, '0')}:${String(mins).padStart(2, '0')} ${ampm}`;
+    },
+
+    // Limpia y normaliza texto
+    limpiarTexto(texto) {
+      return String(texto || '')
+        .replace(/\r\n?/g, ' ')
+        .replace(/\n+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .replace(/["""'']/g, '"')
+        .replace(/[–—]/g, '-')
+        .trim();
+    },
+
+    // Quita acentos de texto
+    quitarAcentos(texto) {
+      return String(texto || '')
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, '');
+    },
+
+    // Normaliza nombres de meses
+    normalizarMes(mes) {
+      const mesLimpio = String(mes || '')
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, '');
+      
+      const meses = {
+        'enero': 'enero',
+        'febrero': 'febrero',
+        'marzo': 'marzo',
+        'abril': 'abril',
+        'mayo': 'mayo',
+        'junio': 'junio',
+        'julio': 'julio',
+        'agosto': 'agosto',
+        'septiembre': 'septiembre',
+        'octubre': 'octubre',
+        'noviembre': 'noviembre',
+        'diciembre': 'diciembre'
+      };
+      
+      return meses[mesLimpio] || mes;
+    },
+
+    // Capitaliza texto (primera letra mayúscula)
+    capitalizarTexto(texto) {
+      return texto ? texto.charAt(0).toUpperCase() + texto.slice(1).toLowerCase() : texto;
+    },
+
+    // Escapa caracteres HTML
+    escapeHtml(texto) {
+      const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+        '/': '&#47;',
+        '`': '&#96;',
+        '=': '&#61;'
+      };
+      
+      return String(texto || '').replace(/[&<>"'`=\/]/g, c => map[c]);
+    },
+
+    // Valida si un nombre es un libro bíblico válido
+    isLibroValido(nombre) {
+      if (!nombre) return false;
+      
+      const normalizado = this.quitarAcentos(String(nombre).toUpperCase())
+        .replace(/\s+/g, ' ')
+        .trim();
+      
+      return CONFIG.LIBROS.some(libro => {
+        const libroNorm = this.quitarAcentos(libro).toUpperCase();
+        return libroNorm === normalizado ||
+               (libroNorm.includes(normalizado) && normalizado.length >= 4) ||
+               (normalizado.includes(libroNorm) && libroNorm.length >= 4);
+      });
+    },
+
+    // Log en consola (solo si debug está activo)
+    log(...args) {
+      if (Estado.debug) {
+        console.log(...args);
+      }
+    },
+
+    // Muestra notificación toast
+    mostrarToast(mensaje) {
+      let toast = document.getElementById('toast');
+      
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'toast';
+        document.body.appendChild(toast);
+      }
+      
+      toast.textContent = mensaje;
+      toast.style.opacity = '1';
+      
+      setTimeout(() => toast.style.opacity = '0', 2500);
+    }
+  };
+
+  // ============================================
+  // PROCESADOR DE ARCHIVOS EPUB
+  // ============================================
+  const ProcesadorEPUB = {
+    // Obtiene archivos HTML del EPUB
+    obtenerArchivosHTML(zip) {
+      const archivos = [];
+      
+      zip.forEach((rutaRelativa, entrada) => {
+        const lower = rutaRelativa.toLowerCase();
+        
+        // Solo archivos HTML, excluyendo navegación, tabla de contenidos y portada
+        if (rutaRelativa.match(/\.(x?html?)$/i) &&
+            !lower.includes('nav') &&
+            !lower.includes('toc') &&
+            !lower.includes('cover')) {
+          archivos.push({
+            ruta: rutaRelativa,
+            entrada: entrada
+          });
+        }
+      });
+      
+      // Ordenar por nombre de archivo
+      archivos.sort((a, b) => a.ruta.localeCompare(b.ruta));
+      
+      return archivos;
+    },
+
+    // Extrae todo el texto de los archivos HTML
+    async extraerTextoCompleto(archivos) {
+      let textoCompleto = '';
+      
+      for (const archivo of archivos) {
+        const contenido = await archivo.entrada.async('string');
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(contenido, 'text/html');
+        
+        textoCompleto += this.extraerTextoElemento(doc.body || doc.documentElement) + '\n\n';
+      }
+      
+      return textoCompleto;
+    },
+
+    // Extrae texto de un elemento DOM recursivamente
+    extraerTextoElemento(elemento) {
+      let texto = '';
+      
+      for (const nodo of elemento.childNodes) {
+        if (nodo.nodeType === Node.TEXT_NODE) {
+          texto += nodo.textContent;
+        } else if (nodo.nodeType === Node.ELEMENT_NODE) {
+          const tag = nodo.tagName;
+          const esBloque = ['P', 'DIV', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'BR', 'LI', 'SECTION'].includes(tag);
+          
+          texto += this.extraerTextoElemento(nodo);
+          
+          if (esBloque) {
+            texto += '\n';
+          }
+        }
+      }
+      
+      return texto;
+    },
+
+    // Procesa el archivo EPUB completo
+    async procesar(archivo) {
+      if (!archivo) {
+        throw new Error('No se recibió archivo');
+      }
+      
+      const arrayBuffer = await archivo.arrayBuffer();
+      const zip = await JSZip.loadAsync(arrayBuffer);
+      const archivosHTML = this.obtenerArchivosHTML(zip);
+      
+      Utils.log('📂 Archivos HTML encontrados:', archivosHTML.length);
+      
+      if (!archivosHTML.length) {
+        throw new Error('No se encontraron archivos HTML en el EPUB.');
+      }
+      
+      const textoCompleto = await this.extraerTextoCompleto(archivosHTML);
+      Utils.log('📝 Longitud del texto extraído:', textoCompleto.length);
+      
+      return this.extraerSemanas(textoCompleto);
+    },
+
+    // Extrae todas las semanas del texto
+    extraerSemanas(texto) {
+      // Normalizar saltos de línea
+      texto = texto.replace(/\r\n?/g, '\n').replace(/\n{3,}/g, '\n\n');
+      
+      const matches = [];
+      
+      // Regex para formato "1 DE ENERO A 7 DE ENERO"
+      const regexA = /(\d{1,2})\s+DE\s+([A-ZÁÉÍÓÚÑ]+)\s+A\s+(\d{1,2})\s+DE\s+([A-ZÁÉÍÓÚÑ]+)/gi;
+      
+      // Regex para formato "1-7 DE ENERO"
+      const regexGuion = /(\d{1,2})\s*[-–—]\s*(\d{1,2})\s+DE\s+([A-ZÁÉÍÓÚÑ]+)/gi;
+      
+      let match;
+      
+      // Buscar todos los matches del primer formato
+      while ((match = regexA.exec(texto)) !== null) {
+        matches.push({
+          type: 'A',
+          index: match.index,
+          raw: match[0],
+          groups: [match[1], match[2], null, match[3], match[4], null]
+        });
+      }
+      
+      // Buscar todos los matches del segundo formato
+      while ((match = regexGuion.exec(texto)) !== null) {
+        matches.push({
+          type: 'GUION',
+          index: match.index,
+          raw: match[0],
+          groups: [match[1], match[2], match[3]]
+        });
+      }
+      
+      // Ordenar por posición en el texto
+      matches.sort((a, b) => a.index - b.index);
+      
+      if (!matches.length) {
+        return [];
+      }
+      
+      // Procesar cada semana
+      const semanas = matches.map((match, idx) => {
+        const inicio = match.index;
+        const fin = matches[idx + 1]?.index || texto.length;
+        const bloque = texto.substring(inicio, fin);
+        
+        let fecha = '';
+        
+        if (match.type === 'A') {
+          const [dia1, mes1, , dia2, mes2] = match.groups;
+          const mesNorm1 = Utils.capitalizarTexto(Utils.normalizarMes(mes1));
+          const mesNorm2 = Utils.capitalizarTexto(Utils.normalizarMes(mes2));
+          fecha = `${dia1} de ${mesNorm1} a ${dia2} de ${mesNorm2}`;
+        } else {
+          const [diaInicio, diaFin, mes] = match.groups;
+          const mesNorm = Utils.capitalizarTexto(Utils.normalizarMes(mes));
+          fecha = `${diaInicio}-${diaFin} de ${mesNorm}`;
+        }
+        
+        const lectura = this.extraerLectura(bloque);
+        const canciones = this.extraerCanciones(bloque);
+        const tiempos = this.extraerTiempos(bloque);
+        const partes = this.extraerPartes(bloque);
+        
+        return {
+          semana: fecha,
+          lectura: lectura,
+          cancion1: canciones[0] || '132',
+          cancion2: canciones[1] || '46',
+          cancion3: canciones[2] || '137',
+          palabrasIntro: tiempos.intro || '1',
+          palabrasConclusion: tiempos.conclusion || '3',
+          partes: Array.isArray(partes) ? 
+            partes.sort((a, b) => parseInt(a.numero, 10) - parseInt(b.numero, 10)) : 
+            []
+        };
+      });
+      
+      Utils.log('✅ Semanas extraídas:', semanas.length);
+      
+      return semanas;
+    },
+
+    // Extrae la lectura bíblica de un bloque de texto
+    extraerLectura(bloque) {
+      const lineas = bloque.replace(/\r\n?/g, '\n').split('\n');
+      const lineasLimpias = lineas.map(l => l.trim()).filter(Boolean);
+      
+      // Buscar en las primeras 25 líneas
+      for (let i = 0; i < Math.min(25, lineasLimpias.length); i++) {
+        const linea = lineasLimpias[i];
+        
+        // Saltar líneas que no son lecturas
+        if (/canción|oración|palabras de intro|tesoros de la biblia|seamos mejores|nuestra vida/i.test(linea) ||
+            /^\d+\.\s/.test(linea)) {
+          continue;
+        }
+        
+        // Patrón: LIBRO + NÚMEROS (sin dos puntos, que indicaría versículos)
+        const pattern = /^([A-ZÁÉÍÓÚÑ]+(?:\s+[A-ZÁÉÍÓÚÑ]+(?:\s+[A-ZÁÉÍÓÚÑ]+(?:\s+[A-ZÁÉÍÓÚÑ]+)?)?)?)\s+([\d]+(?:\s*[-–—,]\s*[\d]+)*)/i;
+        const match = linea.match(pattern);
+        
+        if (match) {
+          const libroRaw = Utils.limpiarTexto(match[1]).toUpperCase();
+          const refRaw = Utils.limpiarTexto(match[2]);
+          
+          if (Utils.isLibroValido(libroRaw) && !refRaw.includes(':')) {
+            return `${libroRaw} ${refRaw}`;
+          }
+        }
+      }
+      
+      // Búsqueda alternativa: después de la fecha
+      const patternFecha = /\d{1,2}\s+de\s+[a-záéíóúñ]+\s+a\s+\d{1,2}\s+de\s+[a-záéíóúñ]+/i;
+      let indiceFecha = -1;
+      
+      for (let i = 0; i < Math.min(5, lineasLimpias.length); i++) {
+        if (patternFecha.test(lineasLimpias[i])) {
+          indiceFecha = i;
+          break;
+        }
+      }
+      
+      if (indiceFecha !== -1) {
+        const siguientes = lineasLimpias.slice(indiceFecha + 1, indiceFecha + 8);
+        
+        for (const linea of siguientes) {
+          if (/canción|oración|palabras/i.test(linea)) continue;
+          
+          const pattern = /^([A-ZÁÉÍÓÚÑ]+(?:\s+[A-ZÁÉÍÓÚÑ]+(?:\s+[A-ZÁÉÍÓÚÑ]+(?:\s+[A-ZÁÉÍÓÚÑ]+)?)?)?)\s+([\d]+(?:\s*[-–—,]\s*[\d]+)*)/i;
+          const match = linea.match(pattern);
+          
+          if (match) {
+            const libroRaw = Utils.limpiarTexto(match[1]).toUpperCase();
+            const refRaw = Utils.limpiarTexto(match[2]);
+            
+            if (Utils.isLibroValido(libroRaw) && !refRaw.includes(':')) {
+              return `${libroRaw} ${refRaw}`;
+            }
+          }
+        }
+      }
+      
+      return 'NO ENCONTRADA';
+    },
+
+    // Extrae números de canciones
+    extraerCanciones(bloque) {
+      const canciones = [];
+      const regex = /Canción\s+(\d+)/gi;
+      let match;
+      
+      while ((match = regex.exec(bloque)) !== null && canciones.length < 3) {
+        canciones.push(match[1]);
+      }
+      
+      return canciones;
+    },
+
+    // Extrae tiempos de introducción y conclusión
+    extraerTiempos(bloque) {
+      const matchIntro = bloque.match(/Palabras\s+de\s+introducción\s*\(?(\d+)\s*min/i);
+      const matchConclusion = bloque.match(/Palabras\s+de\s+conclusión\s*\(?(\d+)\s*min/i);
+      
+      return {
+        intro: matchIntro?.[1],
+        conclusion: matchConclusion?.[1]
+      };
+    },
+
+    // Extrae todas las partes del programa
+    extraerPartes(bloque) {
+      const partes = [];
+      
+      const secciones = [
+        {
+          nombre: 'TESOROS',
+          inicio: /TESOROS\s+DE\s+LA\s+BIBLIA/i,
+          fin: /SEAMOS\s+MEJORES\s+MAESTROS/i
+        },
+        {
+          nombre: 'MAESTROS',
+          inicio: /SEAMOS\s+MEJORES\s+MAESTROS/i,
+          fin: /NUESTRA\s+VIDA\s+CRISTIANA/i
+        },
+        {
+          nombre: 'VIDA',
+          inicio: /NUESTRA\s+VIDA\s+CRISTIANA/i,
+          fin: null
+        }
+      ];
+      
+      secciones.forEach(seccion => {
+        const indiceInicio = bloque.search(seccion.inicio);
+        
+        if (indiceInicio === -1) return;
+        
+        const indiceFin = seccion.fin ? bloque.search(seccion.fin) : -1;
+        const bloqueSeccion = indiceFin !== -1 ? 
+          bloque.substring(indiceInicio, indiceFin) : 
+          bloque.substring(indiceInicio);
+        
+        partes.push(...this.extraerPartesSeccion(bloqueSeccion, seccion.nombre));
+      });
+      
+      return partes;
+    },
+
+    // Extrae partes de una sección específica
+    extraerPartesSeccion(texto, seccion) {
+      const partes = [];
+      
+      // Patrón: "1. Título de la parte (10 min.)"
+      const regex = /(\d+)\.\s+(.*?)\s*\((\d+)\s*mins?\.?\)/gi;
+      let match;
+      
+      while ((match = regex.exec(texto)) !== null) {
+        let titulo = match[2].trim();
+        
+        // Limpiar referencias de publicaciones
+        titulo = titulo.replace(/\b(lff|lmd|ijwbq|th)\s+lección\s+\d+.*$/i, '').trim();
+        titulo = titulo.replace(/\b(w\d{2}|g\d{2}|ip-\d+|it)\b.*$/i, '').trim();
+        
+        // Validar título
+        if (titulo.length < 3 || titulo.length > 150 ||
+            /^Canción|^Palabras de|^\d+\s*min/i.test(titulo) ||
+            /^\(.*\)$/.test(titulo)) {
+          continue;
+        }
+        
+        // Truncar después de punto y espacio
+        const indicePunto = titulo.indexOf('. ');
+        if (indicePunto !== -1 && indicePunto < titulo.length - 2) {
+          titulo = titulo.substring(0, indicePunto + 1).trim();
+        }
+        
+        partes.push({
+          numero: match[1],
+          titulo: Utils.limpiarTexto(titulo),
+          duracion: match[3],
+          seccion: seccion
+        });
+      }
+      
+      // Agregar partes especiales si no se encontraron
+      this.agregarPartesEspeciales(texto, seccion, partes);
+      
+      return partes;
+    },
+
+    // Agrega partes especiales que deben estar siempre
+    agregarPartesEspeciales(texto, seccion, partes) {
+      if (!texto || !partes) return;
+      
+      if (seccion === 'TESOROS') {
+        // Lectura de la Biblia
+        if (!partes.find(p => /Lectura.*Biblia/i.test(p.titulo))) {
+          const matchLectura = texto.match(/Lectura\s+de\s+la\s+Biblia\s*\((\d+)\s*min/i);
+          
+          if (matchLectura || /Lectura\s+de\s+la\s+Biblia/i.test(texto)) {
+            partes.push({
+              numero: '3',
+              titulo: 'Lectura de la Biblia',
+              duracion: matchLectura?.[1] || '4',
+              seccion: 'TESOROS'
+            });
+          }
+        }
+        
+        // Busquemos perlas escondidas
+        if (!partes.find(p => /perlas escondidas/i.test(p.titulo))) {
+          const matchPerlas = texto.match(/Busquemos\s+perlas\s+escondidas\s*\((\d+)\s*min/i);
+          
+          if (matchPerlas || /perlas escondidas/i.test(texto)) {
+            partes.push({
+              numero: '2',
+              titulo: 'Busquemos perlas escondidas',
+              duracion: matchPerlas?.[1] || '10',
+              seccion: 'TESOROS'
+            });
+          }
+        }
+      }
+      
+      if (seccion === 'VIDA') {
+        // Estudio bíblico de la congregación
+        if (!partes.find(p => /Estudio.*bíblico/i.test(p.titulo))) {
+          const matchEstudio = texto.match(/Estudio\s+bíblico(?:\s+de\s+la\s+congregación)?\s*\((\d+)\s*min/i);
+          
+          if (matchEstudio || /Estudio\s+bíblico/i.test(texto)) {
+            partes.push({
+              numero: '8',
+              titulo: 'Estudio bíblico de la congregación',
+              duracion: matchEstudio?.[1] || '30',
+              seccion: 'VIDA'
+            });
+          }
+        }
+      }
+    }
+  };
+
+  // ============================================
+  // EXTRACTOR - CARGA Y SELECCIÓN DE SEMANAS
+  // ============================================
+  const Extractor = {
+    // Carga el archivo EPUB seleccionado
+    async cargarEPUB() {
+      const fileInput = document.getElementById('epubFile');
+      const btnProcesar = document.getElementById('btnProcesar');
+      
+      if (!fileInput.files.length) {
+        Utils.mostrarToast('⚠️ Selecciona un archivo EPUB');
+        return;
+      }
+      
+      // Deshabilitar botón durante procesamiento
+      btnProcesar.disabled = true;
+      btnProcesar.textContent = '⏳ Procesando...';
+      
+      try {
+        const archivo = fileInput.files[0];
+        const semanas = await ProcesadorEPUB.procesar(archivo);
+        
+        if (semanas && semanas.length !== 0) {
+          Estado.programas = semanas;
+          Utils.mostrarToast(`✅ ${semanas.length} semanas encontradas`);
+          this.mostrarSemanas(semanas);
+        } else {
+          Utils.mostrarToast('❌ No se encontraron semanas');
+        }
+      } catch (error) {
+        console.error('❌ Error al procesar:', error);
+        Utils.mostrarToast('❌ Error al procesar el archivo');
+        alert('Error: ' + error.message);
+      } finally {
+        // Rehabilitar botón
+        btnProcesar.disabled = false;
+        btnProcesar.textContent = '🔍 Procesar EPUB';
+      }
+    },
+
+    // Muestra la lista de semanas disponibles
+    mostrarSemanas(semanas) {
+      const container = document.getElementById('semanasLista');
+      
+      container.innerHTML = `
+        <h3 style="margin-bottom: 15px; color: #0a3ab1; font-size: 1.2rem;">
+          📅 Semanas Disponibles
+        </h3>
+      `;
+      
+      semanas.forEach(semana => {
+        const card = document.createElement('div');
+        card.className = 'semana-card';
+        card.innerHTML = `
+          <div class="semana-titulo">${Utils.escapeHtml(semana.semana)}</div>
+          <div class="semana-lectura">📖 ${Utils.escapeHtml(semana.lectura)}</div>
+          <div class="semana-canciones">🎵 Canciones: ${semana.cancion1}, ${semana.cancion2}, ${semana.cancion3}</div>
+        `;
+        
+        // Event listener para seleccionar semana
+        card.addEventListener('click', () => this.seleccionarSemana(semana));
+        
+        container.appendChild(card);
+      });
+    },
+
+    // Selecciona una semana y muestra el programa
+    seleccionarSemana(semana) {
+      Estado.programaActual = semana;
+      
+      // Cambiar vista
+      document.getElementById('uploadSection').style.display = 'none';
+      document.getElementById('programaContainer').style.display = 'block';
+      
+      // Renderizar programa
+      this.renderizarPrograma(semana);
+      
+      Utils.mostrarToast('✅ Programa cargado');
+      window.scrollTo(0, 0);
+    },
+
+    // Renderiza el programa completo en HTML
+    renderizarPrograma(semana) {
+      // Actualizar header con fecha y lectura
+      document.getElementById('headerInfoDate').innerHTML = `
+        <span>📅</span> <span>${semana.semana}</span>
+      `;
+      
+      document.getElementById('headerInfoReading').innerHTML = `
+        <span>📖</span> <span>${semana.lectura}</span>
+      `;
+      
+      let minutosActuales = CONFIG.INICIO_REUNION_MINUTOS;
+      let html = '';
+      
+      // ============================================
+      // INICIO: Canción y oración inicial
+      // ============================================
+      html += `
+        <div class="section-wrapper">
+          <div class="program-part">
+            <div class="time-part">${Utils.formatoHora(minutosActuales)}</div>
+            <div class="part-details">
+              <div class="song-prayer">
+                <div><strong>• Canción ${semana.cancion1}</strong></div>
+                <div>
+                  <strong>Oración:</strong> 
+                  <span contenteditable="true" class="name-field prayer-field" aria-label="Oración inicial"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+      `;
+      
+      minutosActuales += CONFIG.DURACION_CANCION;
+      
+      // Palabras de introducción
+      html += `
+          <div class="program-part">
+            <div class="time-part">${Utils.formatoHora(minutosActuales)}</div>
+            <div class="part-details">
+              <div class="part-title">
+                <strong>• Palabras de introducción (${semana.palabrasIntro} min.)</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      minutosActuales += parseInt(semana.palabrasIntro);
+      
+      // ============================================
+      // SECCIÓN: TESOROS DE LA BIBLIA
+      // ============================================
+      html += `
+        <div class="section-wrapper">
+          <div class="section-header tesoros">TESOROS DE LA BIBLIA</div>
+        </div>
+        <div class="section-wrapper">
+      `;
+      
+      // Renderizar partes de Tesoros
+      semana.partes.filter(parte => parte.seccion === 'TESOROS').forEach(parte => {
+        const esLectura = /Lectura.*Biblia/i.test(parte.titulo);
+        
+        if (esLectura) {
+          // Lectura de la Biblia tiene dos salas
+          html += `
+            <div class="program-part tesoros">
+              <div class="time-part">${Utils.formatoHora(minutosActuales)}</div>
+              <div class="part-details">
+                <div class="part-title">
+                  ${parte.numero}. ${Utils.escapeHtml(parte.titulo)} (${parte.duracion} min.)
+                </div>
+                <div class="two-columns">
+                  <div class="column">
+                    <div class="location-box">
+                      <div class="location-header">Auditorio principal</div>
+                      <div class="location-content">
+                        <div class="role-field">
+                          <span class="role-label">Estudiante:</span>
+                          <span contenteditable="true" class="name-field" aria-label="Lectura principal"></span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="column">
+                    <div class="location-box">
+                      <div class="location-header">Sala auxiliar</div>
+                      <div class="location-content">
+                        <div class="role-field">
+                          <span class="role-label">Estudiante:</span>
+                          <span contenteditable="true" class="name-field" aria-label="Lectura auxiliar"></span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        } else {
+          // Otras partes de Tesoros (solo auditorio principal)
+          html += `
+            <div class="program-part tesoros">
+              <div class="time-part">${Utils.formatoHora(minutosActuales)}</div>
+              <div class="part-details">
+                <div class="part-title">
+                  ${parte.numero}. ${Utils.escapeHtml(parte.titulo)} (${parte.duracion} min.)
+                </div>
+                <div class="location-box centered">
+                  <div class="location-content">
+                    <div class="role-field">
+                      <span class="role-label">Asignado:</span>
+                      <span contenteditable="true" class="name-field" aria-label="Tesoro ${parte.numero}"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+        
+        minutosActuales += parseInt(parte.duracion);
+      });
+      
+      html += '</div>';
+      
+      // ============================================
+      // SECCIÓN: SEAMOS MEJORES MAESTROS
+      // ============================================
+      html += `
+        <div class="section-wrapper">
+          <div class="section-header gold">SEAMOS MEJORES MAESTROS</div>
+        </div>
+        <div class="section-wrapper">
+      `;
+      
+      const partesMaestros = semana.partes.filter(parte => parte.seccion === 'MAESTROS');
+      
+      partesMaestros.forEach((parte, indice) => {
+        const esUltima = indice === partesMaestros.length - 1;
+        const esDiscurso = esUltima && (
+          /discurso|discípulo/i.test(parte.titulo) || 
+          parseInt(parte.duracion) >= 5
+        );
+        
+        html += `
+          <div class="program-part maestros">
+            <div class="time-part">${Utils.formatoHora(minutosActuales)}</div>
+            <div class="part-details">
+              <div class="part-title">
+                ${parte.numero}. ${Utils.escapeHtml(parte.titulo)} (${parte.duracion} min.)
+              </div>
+              <div class="two-columns">
+                <div class="column">
+                  <div class="location-box">
+                    <div class="location-header">Auditorio principal</div>
+                    <div class="location-content">
+        `;
+        
+        if (esDiscurso) {
+          // Discurso: solo estudiante
+          html += `
+                      <div class="role-field">
+                        <span class="role-label">Estudiante:</span>
+                        <span contenteditable="true" class="name-field" aria-label="Maestro ${parte.numero} principal"></span>
+                      </div>
+          `;
+        } else {
+          // Otras partes: asignado + ayudante
+          html += `
+                      <div class="role-field">
+                        <span class="role-label">Asignado:</span>
+                        <span contenteditable="true" class="name-field" aria-label="Asignado ${parte.numero} principal"></span>
+                      </div>
+                      <div class="role-field">
+                        <span class="role-label">Ayudante:</span>
+                        <span contenteditable="true" class="name-field" aria-label="Ayudante ${parte.numero} principal"></span>
+                      </div>
+          `;
+        }
+        
+        html += `
+                    </div>
+                  </div>
+                </div>
+                <div class="column">
+                  <div class="location-box">
+                    <div class="location-header">Sala auxiliar</div>
+                    <div class="location-content">
+        `;
+        
+        if (esDiscurso) {
+          // Discurso: solo estudiante
+          html += `
+                      <div class="role-field">
+                        <span class="role-label">Estudiante:</span>
+                        <span contenteditable="true" class="name-field" aria-label="Maestro ${parte.numero} auxiliar"></span>
+                      </div>
+          `;
+        } else {
+          // Otras partes: asignado + ayudante
+          html += `
+                      <div class="role-field">
+                        <span class="role-label">Asignado:</span>
+                        <span contenteditable="true" class="name-field" aria-label="Asignado ${parte.numero} auxiliar"></span>
+                      </div>
+                      <div class="role-field">
+                        <span class="role-label">Ayudante:</span>
+                        <span contenteditable="true" class="name-field" aria-label="Ayudante ${parte.numero} auxiliar"></span>
+                      </div>
+          `;
+        }
+        
+        html += `
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        minutosActuales += parseInt(parte.duracion);
+      });
+      
+      html += '</div>';
+      
+      // ============================================
+      // SECCIÓN: NUESTRA VIDA CRISTIANA
+      // ============================================
+      html += `
+        <div class="section-wrapper">
+          <div class="section-header red">NUESTRA VIDA CRISTIANA</div>
+        </div>
+        <div class="section-wrapper">
+      `;
+      
+      // Canción intermedia
+      html += `
+          <div class="program-part vida">
+            <div class="time-part">${Utils.formatoHora(minutosActuales)}</div>
+            <div class="part-details">
+              <div class="song-prayer">
+                <div><strong>• Canción ${semana.cancion2}</strong></div>
+              </div>
+            </div>
+          </div>
+      `;
+      
+      minutosActuales += CONFIG.DURACION_CANCION;
+      
+      // Partes de Vida Cristiana
+      semana.partes.filter(parte => parte.seccion === 'VIDA').forEach(parte => {
+        const esEstudio = /Estudio.*bíblico/i.test(parte.titulo);
+        
+        html += `
+          <div class="program-part vida">
+            <div class="time-part">${Utils.formatoHora(minutosActuales)}</div>
+            <div class="part-details">
+              <div class="part-title">
+                ${parte.numero}. ${Utils.escapeHtml(parte.titulo)} (${parte.duracion} min.)
+              </div>
+              <div class="location-box centered">
+                <div class="location-content">
+        `;
+        
+        if (esEstudio) {
+          // Estudio bíblico: conductor + lector
+          html += `
+                  <div class="role-field">
+                    <span class="role-label">Conductor:</span>
+                    <span contenteditable="true" class="name-field" aria-label="Conductor estudio"></span>
+                  </div>
+                  <div class="role-field">
+                    <span class="role-label">Lector:</span>
+                    <span contenteditable="true" class="name-field" aria-label="Lector estudio"></span>
+                  </div>
+          `;
+        } else {
+          // Otras partes: solo asignado
+          html += `
+                  <div class="role-field">
+                    <span class="role-label">Asignado:</span>
+                    <span contenteditable="true" class="name-field" aria-label="Vida ${parte.numero}"></span>
+                  </div>
+          `;
+        }
+        
+        html += `
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        minutosActuales += parseInt(parte.duracion);
+      });
+      
+      // Palabras de conclusión
+      html += `
+          <div class="program-part vida">
+            <div class="time-part">${Utils.formatoHora(minutosActuales)}</div>
+            <div class="part-details">
+              <div class="part-title">
+                <strong>• Palabras de conclusión (${semana.palabrasConclusion} min.)</strong>
+              </div>
+            </div>
+          </div>
+      `;
+      
+            minutosActuales += parseInt(semana.palabrasConclusion);
+      
+      // Canción final y oración
+      html += `
+          <div class="program-part vida">
+            <div class="time-part">${Utils.formatoHora(minutosActuales)}</div>
+            <div class="part-details">
+              <div class="song-prayer">
+                <div><strong>• Canción ${semana.cancion3}</strong></div>
+                <div>
+                  <strong>Oración:</strong> 
+                  <span contenteditable="true" class="name-field prayer-field" aria-label="Oración final"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      // Insertar HTML en el contenedor
+      document.getElementById('programaParts').innerHTML = html;
+      
+      // Configurar autoguardado
+      UIControls.setupAutosave();
+    }
+  };
+
+  // ============================================
+  // UI CONTROLS - CONTROLES DE INTERFAZ
+  // ============================================
+  const UIControls = {
+    // Deshabilita/habilita todos los botones
+    disableButtons(estado) {
+      document.querySelectorAll('.btn').forEach(boton => {
+        boton.disabled = estado;
+      });
+    },
+
+    // Oculta los botones de acción
+    hideButtons() {
+      const botonesDiv = document.querySelector('.action-buttons');
+      
+      if (!botonesDiv) return null;
+      
+      const displayPrevio = botonesDiv.style.display;
+      botonesDiv.style.display = 'none';
+      
+      return displayPrevio;
+    },
+
+    // Restaura la visibilidad de los botones
+    restoreButtons(displayPrevio) {
+      const botonesDiv = document.querySelector('.action-buttons');
+      
+      if (botonesDiv) {
+        botonesDiv.style.display = displayPrevio || 'flex';
+      }
+    },
+
+    // Genera e imprime PDF
+    async imprimirPDF() {
+      this.disableButtons(true);
+      
+      const container = document.getElementById('programaContainer');
+      const displayPrevio = this.hideButtons();
+      
+      try {
+        const { jsPDF } = window.jspdf;
+        
+        // Fallback a window.print() si jsPDF no está disponible
+        if (typeof jsPDF !== 'function') {
+          window.print();
+          return;
+        }
+        
+        // Capturar el contenedor como imagen
+        const canvas = await html2canvas(container, {
+          scale: 2,
+          backgroundColor: '#ffffff',
+          useCORS: true
+        });
+        
+        const imgData = canvas.toDataURL('image/png');
+        
+        // Crear PDF
+        const pdf = new jsPDF({
+          unit: 'pt',
+          format: 'letter'
+        });
+        
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        
+        // Cargar imagen
+        const img = new Image();
+        img.src = imgData;
+        
+        await new Promise(resolve => {
+          img.onload = resolve;
+        });
+        
+        // Calcular dimensiones respetando aspect ratio
+        const ratio = Math.min(pageWidth / img.width, pageHeight / img.height);
+        const width = img.width * ratio;
+        const height = img.height * ratio;
+        const x = (pageWidth - width) / 2;
+        const y = (pageHeight - height) / 2;
+        
+        // Agregar imagen al PDF
+        pdf.addImage(imgData, 'PNG', x, y, width, height);
+        
+        // Descargar
+        pdf.save('programa-reunion.pdf');
+        
+        Utils.mostrarToast('✅ PDF generado correctamente');
+      } catch (error) {
+        console.error(error);
+        Utils.mostrarToast('⚠️ Error al generar PDF, usando impresión del navegador');
+        window.print();
+      } finally {
+        this.restoreButtons(displayPrevio);
+        this.disableButtons(false);
+      }
+    },
+
+    // Guarda el programa como imagen PNG
+    async guardarImagen() {
+      this.disableButtons(true);
+      
+      const container = document.getElementById('programaContainer');
+      const displayPrevio = this.hideButtons();
+      
+      try {
+        const canvas = await html2canvas(container, {
+          scale: 2,
+          backgroundColor: '#ffffff',
+          useCORS: true
+        });
+        
+        // Crear link de descarga
+        const link = document.createElement('a');
+        link.download = 'programa-reunion.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        
+        Utils.mostrarToast('✅ Imagen guardada correctamente');
+      } catch (error) {
+        console.error(error);
+        Utils.mostrarToast('⚠️ Error al generar la imagen');
+      } finally {
+        this.restoreButtons(displayPrevio);
+        this.disableButtons(false);
+      }
+    },
+
+    // Guarda el programa como archivo HTML standalone
+    guardarHTML() {
+      const container = document.getElementById('programaContainer').cloneNode(true);
+      
+      // Reemplazar campos editables por spans con el contenido actual
+      container.querySelectorAll('[contenteditable="true"]').forEach(field => {
+        const text = field.textContent.trim();
+        const span = document.createElement('span');
+        span.textContent = text || '_______________';
+        span.style.cssText = field.style.cssText;
+        span.className = field.className;
+        field.parentNode.replaceChild(span, field);
+      });
+      
+      // Eliminar botones de acción
+      const buttons = container.querySelector('.action-buttons');
+      if (buttons) {
+        buttons.remove();
+      }
+      
+      // Crear documento HTML completo
+      const htmlDoc = `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Programa JW - ${Estado.programaActual?.semana || ''}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;background:#fff;color:#111;padding:12px;line-height:1.5}
+.container{max-width:950px;margin:0 auto;background:#fff;border-radius:10px;overflow:hidden}
+.header{background:linear-gradient(135deg,#0a3ab1 0%,#1e58e7 50%,#3b82f6 100%);color:white;text-align:center;padding:20px}
+.header h1{font-size:1.5rem;margin-bottom:12px;font-weight:600;letter-spacing:.3px}
+.header-divider{height:2px;background:rgba(255,255,255,.3);margin:12px auto;max-width:600px}
+.header-info-grid{display:grid;grid-template-columns:auto auto auto;gap:20px;justify-content:center;align-items:center;font-size:.95rem;margin-top:10px}
+.header-info-grid>div{display:flex;align-items:center;gap:6px}
+.info-section{background:#f9fafb;padding:20px;border-bottom:1px solid #e5e7eb;display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+.info-box{background:white;padding:14px 18px;border-radius:8px;border-left:4px solid #0a3ab1;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.info-label{font-weight:600;color:#374151;margin-bottom:6px;font-size:.9rem}
+.section-wrapper{max-width:950px;margin:0 auto;padding:0 20px}
+.section-header{color:white;padding:12px 20px;font-weight:700;text-transform:uppercase;letter-spacing:1px;box-shadow:0 2px 4px rgba(0,0,0,.15);font-size:.9rem;border-radius:8px;margin:20px 0 15px 0;display:inline-block;min-width:250px;max-width:100%;width:auto}
+.section-header.tesoros{background:linear-gradient(135deg,#6b7280,#9ca3af)}
+.section-header.gold{background:linear-gradient(135deg,#d97706,#f59e0b)}
+.section-header.red{background:linear-gradient(135deg,#7f1d1d,#991b1b)}
+.program-part{display:flex;padding:18px 20px;border-bottom:1px solid #f3f4f6;align-items:flex-start;gap:15px;position:relative}
+.program-part.tesoros::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:#9ca3af}
+.program-part.maestros::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:#f59e0b}
+.program-part.vida::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:#991b1b}
+.time-part{background:linear-gradient(135deg,#f0f4ff,#e3f2fd);padding:8px 14px;border-radius:8px;font-weight:700;color:#0a3ab1;display:inline-block;min-width:95px;text-align:center;flex-shrink:0;font-size:1rem;border:2px solid #dbeafe;box-shadow:0 2px 4px rgba(10,58,177,.1)}
+.part-details{flex:1}
+.song-prayer{display:flex;align-items:center;justify-content:flex-start;gap:20px;flex-wrap:wrap}
+.song-prayer>div:first-child{flex:0 0 auto;font-weight:600}
+.part-title{margin-bottom:10px;font-weight:600;color:#1f2937;font-size:1rem}
+.location-box{border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin-top:10px;overflow:hidden;background:#fafafa;max-width:100%;border:1px solid #e5e7eb}
+.location-box.centered{max-width:600px;margin-left:0;margin-right:auto}
+.location-header{background:linear-gradient(135deg,#e5e7eb,#f3f4f6);padding:10px 14px;font-weight:700;text-align:center;font-size:.9rem;color:#374151;border-bottom:2px solid #d1d5db}
+.location-content{padding:14px 18px;background:white}
+.role-field{display:flex;align-items:center;justify-content:flex-start;margin-bottom:12px;min-height:36px;gap:12px}
+.role-field:last-child{margin-bottom:0}
+.role-label{font-weight:600;min-width:100px;flex-shrink:0;color:#4b5563;text-align:left;font-size:.9rem}
+.two-columns{display:flex;gap:24px;justify-content:flex-start;flex-wrap:wrap;position:relative}
+.two-columns::after{content:'';position:absolute;left:50%;top:10%;bottom:10%;width:2px;background:linear-gradient(to bottom,transparent,#d1d5db,transparent);transform:translateX(-50%);pointer-events:none}
+.column{flex:1;min-width:280px;max-width:450px}
+@media(max-width:768px){.two-columns{flex-direction:column;gap:12px}.two-columns::after{display:none}.column{max-width:100%}.header-info-grid{grid-template-columns:1fr;gap:10px}.info-section{grid-template-columns:1fr}}
+@media(max-width:600px){body{padding:6px}.section-wrapper{padding:0 10px}.section-header{width:100%;margin:15px 0 10px 0;border-radius:6px;min-width:0}.header{padding:12px 10px}.header h1{font-size:1rem;margin-bottom:6px;line-height:1.3}.header-divider{margin:8px auto}.header-info-grid{grid-template-columns:1fr;gap:8px;font-size:.85rem}.info-section{padding:10px;grid-template-columns:1fr;gap:10px}.info-box{padding:10px 12px}.info-label{font-size:.85rem}.section-header{padding:8px 10px;font-size:.85rem;letter-spacing:.5px}.program-part{flex-direction:column;padding:12px 10px;gap:8px}.program-part::before{width:3px}.time-part{font-size:.95rem;padding:6px 12px;min-width:85px}.part-title{font-size:.9rem;margin-bottom:8px}.song-prayer{flex-direction:column;gap:8px;align-items:flex-start}.location-box{margin-top:8px}.location-header{padding:8px 10px;font-size:.85rem}.location-content{padding:10px 12px}.role-field{flex-direction:column;align-items:flex-start;gap:4px;margin-bottom:10px}.role-label{font-size:.85rem}}
+@media print{body{padding:0;background:white}.container{box-shadow:none;border-radius:0}.program-part::before{display:none}}
+</style>
+</head>
+<body>
+${container.outerHTML}
+</body>
+</html>`;
+      
+      // Crear Blob y descargar
+      const blob = new Blob([htmlDoc], { type: 'text/html' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `programa-${Estado.programaActual?.semana?.replace(/\s+/g, '-') || 'reunion'}.html`;
+      link.click();
+      
+      Utils.mostrarToast('✅ HTML guardado correctamente');
+    },
+
+    // Limpia todos los campos editables
+    limpiarCampos() {
+      if (!confirm('¿Seguro que deseas limpiar todos los campos editables?')) {
+        return;
+      }
+      
+      document.querySelectorAll('[contenteditable="true"]').forEach(field => {
+        field.textContent = '';
+        
+        // Limpiar también de localStorage
+        const key = 'jwapp-' + (field.getAttribute('aria-label') || 'field');
+        localStorage.removeItem(key);
+      });
+      
+      Utils.mostrarToast('✅ Todos los campos han sido limpiados');
+    },
+
+    // Vuelve a la pantalla de selección de semanas
+    volverSeleccion() {
+      if (!confirm('¿Volver a la selección de semanas?')) {
+        return;
+      }
+      
+      document.getElementById('uploadSection').style.display = 'block';
+      document.getElementById('programaContainer').style.display = 'none';
+    },
+
+    // Configura autoguardado en localStorage
+    setupAutosave() {
+      document.querySelectorAll('[contenteditable="true"]').forEach(field => {
+        const key = 'jwapp-' + (field.getAttribute('aria-label') || 'field');
+        
+        // Cargar valor guardado
+        const valorGuardado = localStorage.getItem(key);
+        if (valorGuardado) {
+          field.textContent = valorGuardado;
+        }
+        
+        // Función para guardar
+        const guardar = () => {
+          localStorage.setItem(key, field.textContent.trim());
+        };
+        
+        // Event listeners para autoguardado
+        field.addEventListener('input', guardar);
+        field.addEventListener('blur', guardar);
+      });
+    }
+  };
+
+  // ============================================
+  // EVENT LISTENERS - INICIALIZACIÓN
+  // ============================================
+  document.addEventListener('DOMContentLoaded', () => {
+    // Botón: Procesar EPUB
+    document.getElementById('btnProcesar')?.addEventListener('click', () => {
+      Extractor.cargarEPUB();
+    });
+    
+    // Botón: Generar PDF
+    document.getElementById('btnPdf')?.addEventListener('click', () => {
+      UIControls.imprimirPDF();
+    });
+    
+    // Botón: Guardar como Imagen
+    document.getElementById('btnImage')?.addEventListener('click', () => {
+      UIControls.guardarImagen();
+    });
+    
+    // Botón: Guardar como HTML
+    document.getElementById('btnHtml')?.addEventListener('click', () => {
+      UIControls.guardarHTML();
+    });
+    
+    // Botón: Limpiar campos
+    document.getElementById('btnClean')?.addEventListener('click', () => {
+      UIControls.limpiarCampos();
+    });
+    
+    // Botón: Volver a selección
+    document.getElementById('btnBack')?.addEventListener('click', () => {
+      UIControls.volverSeleccion();
+    });
+    
+    // Listener global: Presionar ESC en campos editables los desenfoca
+    document.body.addEventListener('keydown', (event) => {
+      if (event.target.contentEditable === 'true' && event.key === 'Escape') {
+        event.target.blur();
+      }
+    });
+  });
+
+// Fin de la función autoejecutable
+})();
+  </script>
+</body>
+</html>
